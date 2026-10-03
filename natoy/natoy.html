@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Natoy</title>
+    <link rel="stylesheet" href="./natoy.css" />
+  </head>
+  <body>
+    <main class="photo-page">
+      <img
+        src="Unknown-3.jpg"
+        alt="Natoy image"
+        class="photo"
+      />
+
+      <div class="chat-panel" id="chatPanel">
+        <div class="chat-messages" id="chatMessages">
+          <div class="message boy">Hi! I’m Jariel 😊</div>
+        </div>
+
+        <div class="input-row">
+          <input
+            id="chatInput"
+            type="text"
+            placeholder="Type your message..."
+            aria-label="Type a message"
+          />
+          <button id="sendButton" type="button">Send</button>
+        </div>
+      </div>
+
+      <button
+        class="boy-hotspot"
+        type="button"
+        aria-label="Comment on the boy"
+      >
+        <span class="sr-only">Boy</span>
+      </button>
+
+      <a
+        class="door-link"
+        href="../pet/sky.html"
+        aria-label="Go back to the sky image"
+      ></a>
+    </main>
+
+    <script>
+      const chatMessages = document.getElementById('chatMessages');
+      const chatInput = document.getElementById('chatInput');
+      const sendButton = document.getElementById('sendButton');
+
+      function addMessage(text, sender) {
+        const message = document.createElement('div');
+        message.className = `message ${sender}`;
+        message.textContent = text;
+        chatMessages.appendChild(message);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      async function sendReply() {
+        const userText = chatInput.value.trim();
+        if (!userText) return;
+
+        addMessage(userText, 'user');
+        chatInput.value = '';
+
+        try {
+          const response = await fetch('http://localhost:3000/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: userText })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || 'Something went wrong');
+          }
+
+          addMessage(data.reply, 'boy');
+        } catch (error) {
+          addMessage('Sorry, the AI is unavailable right now.', 'boy');
+        }
+      }
+
+      sendButton.addEventListener('click', sendReply);
+      chatInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          sendReply();
+        }
+      });
+    </script>
+  </body>
+</html>
